@@ -1,12 +1,14 @@
-# bRight byte series 1.0 - labelled data and likert scales
+# bRight byte series overview
 
 <img src="img/solaris.png" alt="Logo" width="300"/>
 
-The bRight byte series aims to provide useful R code snippets to assist in solving real world data issues. This is one particular approach to working with labelled data - there are many others. Please take what's new to you and feel free to discard the rest. 
+The bRight byte series aims to provide useful R code snippets to assist in solving real world data issues, particularly the issues encountered by those engaged in survey research. The focus is on providing templates for easier data cleaning, analysis, and visualization.  
 
 > 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com
 
-# <img src="img/core.png" alt="element" width="25"/>  learning goals 
+# bRight byte series - working with labelled data
+
+## <img src="img/core.png" alt="element" width="25"/>  learning goals
 
 In this bRight byte, we will answer the following questions: 
  * How can a little pre-cleaning planning improve our data cleaning process?
