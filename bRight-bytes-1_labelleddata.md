@@ -2,7 +2,7 @@
 
 <img src="img/solaris.png" alt="Logo" width="300"/>
 
-The bRight byte series aims to provide useful R code snippets to assist in solving real world data problems, particularly issues encountered by those engaged in survey research. The focus is on providing templates for easier data cleaning, analysis, and visualization.  
+The bRight bytes series aims to provide useful R code snippets to assist in solving real world data problems, particularly issues encountered by those engaged in survey research. The focus is on providing templates for easier data cleaning, analysis, and visualization.  
 
 > 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com
 
