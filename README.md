@@ -6,6 +6,6 @@ The bRight bytes series aims to provide useful R code snippets to assist in solv
 
 [bRight byte 1 - Working with Labelled Data](bRight-bytes-1_labelleddata.md)
 
-[bRight byte 2 - Graphing Labelled Data](bRight-bytes-2_figures.md)
+[bRight byte 2 - Tables for Labelled Data](bRight-bytes-2_tables.md)
 
 > 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com

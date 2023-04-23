@@ -1,29 +1,19 @@
-# bRight bytes 2 - graphing labelled data
+# bRight bytes 2 - tables for labelled data
 
 ## <img src="img/core.png" alt="element" width="20"/>  learning goals
 
 In this bRight byte, we will tackle the following questions: 
- * How can a little pre-cleaning planning improve our data cleaning process?
- * How do we create some test data to try our process on?
- * How do we label numeric variables?
- * How do we label character variables?
- * How do we recode labelled variables?
- * How do we save our data set?
+ * How do we read in our saved data set?
+ * How do we format our data for table creation?
+ * How do we create usable tables?
+ * How do we edit table options?
+ * How do we combine multiple questions into one table?
+ * How do we save or export our tables?
  
 We will primarily be using the tidyverse function `mutate()` to transform variables and `across()` to apply those transformations to multiple variables.  We will use a few selection helpers such as `contains()`, `starts_with()`, and `ends_with` in conjunction with the `.names` argument of `across()` to apply naming conventions and select groups of variables. `labelled()` and `rec()` will assist in labeling our variables and re-coding our labelled variables.
 
  
-## <img src="img/core.png" alt="element" width="20"/>  a note about naming conventions
-
-Planning our cleaning process and analysis plan is an important but often overlooked step in the data processing pipeline. Creating naming conventions that are easily used allows you to select and transform variables quickly and easily. In survey research, this could be a validated scale or simply questions with the same response options. These conventions do not have to be permanent, but may be dropped after cleaning.  Thinking deeply about your data structure can help avoid misunderstandings and better connect you with your data. Here are a few examples of naming conventions:
- * _r (recoded) 
- * _daX (X point disagree - agree scale)
- * _catX (X categories)
- * _asc (categories ascending) or _dsc (categories descending)
- * _rev (reversed)
-
- 
-## <img src="img/core.png" alt="element" width="20"/>  create test data
+## <img src="img/core.png" alt="element" width="20"/>  reading in our data
 
 Since we're using R, lets install and load the required packages
  * tidyverse for data wrangling
