@@ -1,12 +1,4 @@
-# bRight bytes series overview
-
-<img src="img/solaris.png" alt="Logo" width="300"/>
-
-The bRight bytes series aims to provide useful R code snippets to assist in solving real world data problems, particularly issues encountered by those engaged in survey research. The focus is on providing templates for easier data cleaning, analysis, and visualization.  
-
-> 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com
-
-# bRight bytes - working with labelled data
+# bRight bytes 1 - working with labelled data
 
 ## <img src="img/core.png" alt="element" width="20"/>  learning goals
 
@@ -232,3 +224,4 @@ lowhigh5_labels <- c("Much lower" = 1,
                 "Much higher" = 5)
 ```
 
+> 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com

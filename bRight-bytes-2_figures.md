@@ -1,12 +1,4 @@
-# bRight bytes series overview
-
-<img src="img/solaris.png" alt="Logo" width="300"/>
-
-The bRight bytes series aims to provide useful R code snippets to assist in solving real world data problems, particularly issues encountered by those engaged in survey research. The focus is on providing templates for easier data cleaning, analysis, and visualization.  
-
-> 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com
-
-# bRight bytes - graphing labelled data
+# bRight bytes 2 - graphing labelled data
 
 ## <img src="img/core.png" alt="element" width="20"/>  learning goals
 
@@ -105,6 +97,6 @@ haven::write_sav(dat_labelled.2, "path/to/data/filename.sav")
 write_rds(dat_labelled.2, "path/to/data/filename.rds")
 ```
 
- 
+> 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com
 
 
