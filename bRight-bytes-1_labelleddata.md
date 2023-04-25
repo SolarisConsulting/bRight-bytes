@@ -10,17 +10,18 @@ In this bRight byte, we will tackle the following questions:
  * How do we recode labelled variables?
  * How do we save our data set?
  
-We will primarily be using the tidyverse function `mutate()` to transform variables and `across()` to apply those transformations to multiple variables.  We will use a few selection helpers such as `contains()`, `starts_with()`, and `ends_with` in conjunction with the `.names` argument of `across()` to apply naming conventions and select groups of variables. `labelled()` and `rec()` will assist in labeling our variables and re-coding our labelled variables.
+We will primarily be using the tidyverse function `mutate()` to transform variables and `across()` to apply those transformations to multiple variables. We will use a few selection helpers such as `contains()`, `starts_with()`, and `ends_with` in conjunction with the `.names` argument of `across()` to apply naming conventions and select groups of variables. `labelled()` and `rec()` will assist in labeling our variables and re-coding our labelled variables.
 
  
 ## <img src="img/core.png" alt="element" width="20"/>  a note about naming conventions
 
-Planning our cleaning process and analysis plan is an important but often overlooked step in the data processing pipeline. Creating naming conventions that are easily used allows you to select and transform variables quickly and easily. In survey research, this could be a validated scale or simply questions with the same response options. These conventions do not have to be permanent, but may be dropped after cleaning.  Thinking deeply about your data structure can help avoid misunderstandings and better connect you with your data. Here are a few examples of naming conventions:
+Planning our cleaning process and analysis plan is an important but often overlooked step in the data processing pipeline. Creating naming conventions that are easily used allows you to select and transform variables quickly and easily. In survey research, this could be a validated scale or simply questions with the same response options. These conventions do not have to be permanent, but may be dropped after cleaning. Thinking deeply about your data structure can help avoid misunderstandings and better connect you with your data. Here are a few examples of naming conventions:
  * _r (recoded) 
  * _daX (X point disagree - agree scale)
  * _catX (X categories)
  * _asc (categories ascending) or _dsc (categories descending)
  * _rev (reversed)
+ * _sa (select all that apply questions)
 
  
 ## <img src="img/core.png" alt="element" width="20"/>  create test data
@@ -30,15 +31,15 @@ Since we're using R, lets install and load the required packages
  * haven, labelled, and sjmisc for labelled data transformation
 
 ```{r}
-install.packages(c("tidyverse", "haven", "labelled", "sjmisc"))
+install.packages(c("tidyverse", "haven", "sjmisc", "labelled"))
 
 library(tidyverse)
 library(haven)
-library(labelled)
 library(sjmisc)
+library(labelled)
 ```
 
-First, we will specify the number of cases for our test data set.  In this case, we've defined the object `n_sample` the number 100 cases, which we use in the creation of our data set.  We create the data set using `tibble()` to work with tidyverse package. First, we use `seq()` to create a unique, sequential id variable, the length of the sample `n_sample`. The next variables are created using `sample.int()` that samples integers that will represent questionnaire responses to a Likert scale.  We are not dealing with missing data in this tutorial. Remember to specify `replace = TRUE` in order to sample with replacement. Our grouping variable, prepost, is created as a character variable using `sample()` to demonstrate how to create text variables and to show the differences in cleaning various types of data.  
+First, we will specify the number of cases for our test data set. In this case, we've defined the object `n_sample` the number 100 cases, which we use in the creation of our data set. We create the data set using `tibble()` to work with tidyverse package. First, we use `seq()` to create a unique, sequential id variable, the length of the sample `n_sample`. The next variables are created using `sample.int()` that samples integers that will represent questionnaire responses to a Likert scale.  We are not dealing with missing data in this tutorial. Remember to specify `replace = TRUE` in order to sample with replacement. Our grouping variable, prepost, is created as a character variable using `sample()` to demonstrate how to create text variables and to show the differences in cleaning various types of data.  
 
 ```{r}
 n_sample <- 100
@@ -51,9 +52,10 @@ dat <- tibble(
   q1 = sample.int(5, n_sample, replace = TRUE),
   q2 = sample.int(5, n_sample, replace = TRUE),
   q3 = sample.int(5, n_sample, replace = TRUE),
-  q4 = sample.int(5, n_sample, replace = TRUE),
-  q5 = sample.int(5, n_sample, replace = TRUE),
-  ## create prepost variable sampling from character options c("Pre", "Post") to demonstrate cleaning approach
+  group = sample.int(4, n_sample, replace = TRUE),
+  sa_1 = sample(c("Selected", "Not selected"), n_sample, replace = TRUE),
+  sa_2 = sample(c("Selected", "Not selected"), n_sample, replace = TRUE),
+  cont = sample.int(100, n_sample, replace = TRUE),
   prepost = sample(c("Pre","Post"), n_sample, replace = TRUE)
 )
 ```
@@ -61,7 +63,7 @@ dat <- tibble(
  
 ## <img src="img/core.png" alt="element" width="20"/>  defining scales
 
-Now we define our Likert scales for transformation. At the end of the document are some examples of common Likert scales you can use in your transformations along with a template for creating your own. By saving these as objects we only need to define them once.
+Now we define our Likert scales for transformation. At the end of the document are some examples of common Likert scales you can use in your transformations along with a template for creating your own. By saving these as objects we only need to define them once an can utilize them across multiple variables.
 
 ```{r}
 # specify the labels for your Likert scales
@@ -70,6 +72,14 @@ da5_labels <- c("Strongly disagree" = 1,
                 "Neither disagree nor agree" = 3,
                 "Somewhat agree" = 4,
                 "Strongly agree" = 5)
+                
+sa_labels = c("Not selected" = 1,
+             "Selected" = 2)
+
+group_labels <- c("Group 1" = 1,
+                  "Group 2" = 2,
+                  "Group 3" = 3,
+                  "Group 4" = 4)
 ```
 
  
@@ -79,7 +89,8 @@ Now that we have our test data and have defined our Likert scales, lets apply th
 
 ```{r}
 dat_labelled <- dat %>%
-  mutate(across(contains("q"), ~labelled(.x, labels = da5_labels)))
+  mutate(across(contains("q"), ~labelled(.x, labels = da5_labels))) %>%
+  mutate(group = labelled(group, labels = group_labels))
 ```
 
 We are overwriting the existing variables, so lets be sure to double check our transformations.  We will use `apply(data, 2, table)`, where 2 indicates that we're applying the function `table()` to each of the data set's columns that contain "q" in order to check frequencies (a 1 instead of a 2 would apply `table()` to rows).  Below this we use `lapply(data, str)` to apply `str()` to each variable that contains "q" and output the results in order to check the structure of the transformed variables. This will be used below as well. 
@@ -101,7 +112,10 @@ Here we use `factor()` within `mutate()` to overwrite our prepost with a factori
 dat_labelled.1 <- dat_labelled %>% 
   mutate(prepost = factor(prepost, levels = c("Pre", "Post"))) %>%
   ## creating labelled variables, an example of defining labels directly rather than using predefined labels
-  mutate(across("prepost", ~labelled(.x, labels = c(Pre = 1, Post = 2)))) 
+  mutate(across("prepost", ~labelled(.x, labels = c(Pre = 1, Post = 2)))) %>%
+  ## same process applied to multiple variables
+  mutate(across(contains("sa"), ~factor(.x, levels = c("Not selected", "Selected")))) %>%
+  mutate(across(contains("sa"), ~labelled(.x, labels = sa_labels))) %>%
 
 # double check transformations
 table(dat_labelled$prepost)
@@ -131,13 +145,20 @@ lapply(dat_labelled.2 %>% select(c(starts_with("q"), ends_with("rda3"))), str)
 ```
 
  
-## <img src="img/core.png" alt="element" width="20"/>  saving data
+## <img src="img/core.png" alt="element" width="20"/>  saving data and reading data
 
 We can  use haven's `write_sav()` to write our labelled data as an spss data file `.sav`, or use `write_rds()` to write the data as an r data file `.rds`.
 
 ```{r}
 haven::write_sav(dat_labelled.2, "path/to/data/filename.sav")
 write_rds(dat_labelled.2, "path/to/data/filename.rds")
+```
+
+If you are reading an SPSS file using `haven::read_sav()`, specifying `user_na = TRUE` will retain any missing values you may have defined. By default all missing values will be converted to NA. Importing an .rds file will maintain the file as-is.
+
+```{r}
+data <- haven::read_sav("path/to/data/filename.sav", user_na = TRUE)
+data <- read_rds("path/to/data/filename.rds")
 ```
 
  

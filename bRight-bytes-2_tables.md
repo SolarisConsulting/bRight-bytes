@@ -8,39 +8,136 @@ In this bRight byte, we will tackle the following questions:
  * How do we create usable tables?
  * How do we edit table options?
  * How do we combine multiple questions into one table?
- * How do we save or export our tables?
+ * How do we export our tables?
  
 We will primarily be using the tidyverse function `mutate()` to transform variables and `across()` to apply those transformations to multiple variables.  We will use a few selection helpers such as `contains()`, `starts_with()`, and `ends_with` in conjunction with the `.names` argument of `across()` to apply naming conventions and select groups of variables. `labelled()` and `rec()` will assist in labeling our variables and re-coding our labelled variables.
 
  
 ## <img src="img/core.png" alt="element" width="20"/>  reading in our data
 
-Since we're using R, lets install and load the required packages
+First, lets install and load the required packages
  * tidyverse for data wrangling
  * haven, labelled, and sjmisc for labelled data transformation
+ * gt and gtsummary for summaries and initial table creation
+ * flextable for table formatting and editing
 
 ```{r}
-install.packages(c("tidyverse", "haven", "labelled", "sjmisc"))
+install.packages(c("tidyverse", "haven", "sjmisc", "labelled"))
 
 library(tidyverse)
 library(haven)
-library(labelled)
 library(sjmisc)
+library(labelled)
+
+install.packages(c("gt", "gtsummary", "flextable", "sysfonts"))
+
+library(gt)
+library(gtsummary)
+library(flextable)
+library(sysfonts)
+
+library(tinytex)
 ```
 
-First, we will specify the number of cases for our test data set.  In this case, we've defined the object `n_sample` the number 100 cases, which we use in the creation of our data set.  We create the data set using `tibble()` to work with tidyverse package. First, we use `seq()` to create a unique, sequential id variable, the length of the sample `n_sample`. The next variables are created using `sample.int()` that samples integers that will represent questionnaire responses to a Likert scale.  We are not dealing with missing data in this tutorial. Remember to specify `replace = TRUE` in order to sample with replacement. Our grouping variable, prepost, is created as a character variable using `sample()` to demonstrate how to create text variables and to show the differences in cleaning various types of data.  
+Let's create some test data. We will create both continuous and categorical variables. We've defined the object `n_sample` as the number of cases, 100, in our data set. We create the data set using `tibble()` to work with tidyverse package. First, we use `seq()` to create a unique, sequential id variable, the length of the sample `n_sample`. The continuous variables are created using `sample.int()` that samples integers that will represent questionnaire responses to a Likert scale. Our character variables are created using `sample()`. Remember to specify `replace = TRUE` in order to sample with replacement. For a deeper explanation of these transformations, see [bRight byte 1 - Working with Labelled Data](bRight-bytes-1_labelleddata.md).
 
 ```{r}
+n_sample <- 100
 
+dat <- tibble(
+  id = seq(1, n_sample, 1),
+  q1 = sample.int(5, n_sample, replace = TRUE),
+  q2 = sample.int(5, n_sample, replace = TRUE),
+  q3 = sample.int(5, n_sample, replace = TRUE),
+  group = sample.int(4, n_sample, replace = TRUE),
+  sa_1 = sample(c("Selected", "Not selected"), n_sample, replace = TRUE),
+  sa_2 = sample(c("Selected", "Not selected"), n_sample, replace = TRUE),
+  cont = sample.int(100, n_sample, replace = TRUE),
+  prepost = sample(c("Pre","Post"), n_sample, replace = TRUE)
+)
+
+# create scale variable from sub-scale items
+dat <- dat %>%
+  # rowMeans(.[,2:4], ) specifies the 2nd through 4th column in the dataset
+  # round sets the created variable to a single decimal point
+  mutate(scale = round(rowMeans(.[,2:4], na.rm = TRUE), digits = 1))
+
+# specify the labels for your Likert scales
+da5_labels <- c("Strongly disagree" = 1,
+                "Somewhat disagree" = 2,
+                "Neither disagree nor agree" = 3,
+                "Somewhat agree" = 4,
+                "Strongly agree" = 5)
+
+sa_labels = c("Not selected" = 1,
+             "Selected" = 2)
+
+group_labels <- c("Group 1" = 1,
+                  "Group 2" = 2,
+                  "Group 3" = 3,
+                  "Group 4" = 4)
+
+dat_labelled <- dat %>%
+  mutate(across(contains("q"), ~labelled(.x, labels = da5_labels))) %>%
+  mutate(group = labelled(group, labels = group_labels)) %>%
+  mutate(across(contains("sa"), ~factor(.x, levels = c("Not selected", "Selected")))) %>%
+  mutate(across(contains("sa"), ~labelled(.x, labels = sa_labels))) %>%
+  mutate(prepost = factor(prepost, levels = c("Pre", "Post"))) %>%
+  mutate(across("prepost", ~labelled(.x, labels = c(Pre = 1, Post = 2))))
 ```
 
  
-## <img src="img/core.png" alt="element" width="20"/>  defining scales
+## <img src="img/core.png" alt="element" width="20"/>  factor transformation
 
-Now we define our Likert scales for transformation. At the end of the document are some examples of common Likert scales you can use in your transformations along with a template for creating your own. By saving these as objects we only need to define them once.
+The `gtsummary` package works particularly well with factor variables. We will transform our categorical variables to factors using `mutate()` to apply `labelled::to_factor()` to the factor variables with `across(!all_of(nonfactors),)`, using our defined variable labels as the factor levels. The use of `!all_of()` within `across()` means we want the transformations applied to none of the columns (`!` within `all_of()`) indicated by `nonfactors`.
 
 ```{r}
+# define non-factor variables
+nonfactors <- c("scale", "cont")
 
+# change variables to factor to more easily work with tables
+dat_factor <- dat_labelled %>% 
+  mutate(across(!all_of(nonfactors), ~labelled::to_factor(., levels = "labels", sort_levels = "none")))
+```
+
+ 
+## <img src="img/core.png" alt="element" width="20"/>  categorical variable frequency table
+
+
+```{r}
+# select the variable to be summarized
+group_table <- dat_factor %>% 
+  select(group)
+
+# basic table  
+tbl_summary(group_table)
+
+# specifying table options
+ft_group <- tbl_summary(group_table, 
+                       # set categorical variable statistics {percent}% and ({number}) that show in the summary column
+                       statistic = list(all_categorical() ~ "{p}% ({n})"),
+                       # do not show missing values
+                       missing = "no",
+                       # sort the table by frequency
+                       sort = list(everything() ~ "frequency")) %>%
+  # set the header labels
+  modify_header(label ~ "", stat_0 ~ "% (N)") %>% 
+  # remove the footnote
+  modify_footnote(update = everything() ~ NA) %>%
+  # use flextable::as_flex_table() to turn the table to a flextable object which can be edited there for display
+  as_flex_table()
+
+# edit the group table
+ft_group <- ft_group %>% 
+  # reduce padding around the cells (default is 5)
+  padding(padding.bottom = 3.5, padding.top = 3.5, part = "body") %>% 
+  # auto fit the table
+  set_table_properties(layout = "autofit") %>%
+  # set font
+  font(fontname = "Montserrat", part = "all")
+
+# display group in the report - table 1
+ft_group
 ```
 
  
