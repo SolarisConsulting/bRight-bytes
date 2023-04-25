@@ -103,15 +103,21 @@ dat_factor <- dat_labelled %>%
  
 ## <img src="img/core.png" alt="element" width="20"/>  categorical variable frequency table
 
+First we will look at a frequency table for a single categorical variable, `group`. The table produced has a header that provides a title and the number of cases, the variable's name and its response categories, frequencies and percentages of the responses, and a footer providing further detail about the statistic column. 
 
 ```{r}
-# select the variable to be summarized
-group_table <- dat_factor %>% 
-  select(group)
+dat_factor %>%
+  select(group) %>%
+  tbl_summary()
+```
 
-# basic table  
-tbl_summary(group_table)
+`tbl_summary()` has a number of options that allow us to edit or specify particular parts of the table. The code below does the following: 
+ * `statistic = list(all_categorical() ~ "{p}% ({n}")` allows us to specify the statistics produced for all the categorical variables
+ * `missing = "no"` indicates we do not want missing values displayed
+ * `sort = list(all_categorical() ~ "frequency")` indicates that we want to sort each categorical variable by response frequencies (`sort = NULL does no sorting`, and `sort = list(all_categorical() ~ "alphanumeric")` sorts alphanumerically)
+ * `percent = "column"` is the default, however you can specify if you want to display "row" or "cell" percentages
 
+```{r}
 # specifying table options
 ft_group <- tbl_summary(group_table, 
                        # set categorical variable statistics {percent}% and ({number}) that show in the summary column
@@ -119,7 +125,7 @@ ft_group <- tbl_summary(group_table,
                        # do not show missing values
                        missing = "no",
                        # sort the table by frequency
-                       sort = list(everything() ~ "frequency")) %>%
+                       sort = list(all_categorical() ~ "frequency")) %>%
   # set the header labels
   modify_header(label ~ "", stat_0 ~ "% (N)") %>% 
   # remove the footnote
@@ -141,20 +147,7 @@ ft_group
 ```
 
  
-## <img src="img/core.png" alt="element" width="20"/>  labelling numeric variables
 
-Now that we have our test data and have defined our Likert scales, lets apply those labels and save the transformed data into the new data set `dat_labelled`.  In this case we are using `mutate()` to transform our variables. By using `across(variables, ~labelled())` within `mutate()` we can apply a function, in this case `labelled()`, to multiple variables. `contains()` makes selecting by naming conventions easy, here we're selecting the variables whose names contains "q".  Finally, `~labelled(.x,)` applies the labels we defined above (the ~ and .x are necessary programming nonsense - just make sure they're there for now).
-
-```{r}
-
-```
-
-We are overwriting the existing variables, so lets be sure to double check our transformations.  We will use `apply(data, 2, table)`, where 2 indicates that we're applying the function `table()` to each of the data set's columns that contain "q" in order to check frequencies (a 1 instead of a 2 would apply `table()` to rows).  Below this we use `lapply(data, str)` to apply `str()` to each variable that contains "q" and output the results in order to check the structure of the transformed variables. This will be used below as well. 
-
-```{r}
-# always double check transformations
-
-```
 
  
 ## <img src="img/core.png" alt="element" width="20"/>  labelling character variables 
@@ -165,13 +158,23 @@ Here we use `factor()` within `mutate()` to overwrite our prepost with a factori
 
 ```
 
- 
-## <img src="img/core.png" alt="element" width="20"/>  recoding variables
+## <img src="img/core.png" alt="element" width="20"/>  gtsummary themes
 
-Let's create new variables with the agree and disagree categories collapsed and provide these new variables with an appended name. We will again use mutate(across(contains())) to apply `rec()` across the desired variables. Specifying the recode within `rec()` use the pattern `rec = "old=new;old,old=new"`, chaining grouped recodes together with `;`.  The `.names` option within `across()` appends a naming convention to the new transformed variables. In this case we are adding "_rda3" to indicate that these variables have been recoded to a three category disagree agree scale. `{col}` in this case keeps the original column name at the front.
+`gtsummary()` includes a number of pre-made themes as well as the ability to create and edit your own table themes.
 
 ```{r}
+# set significant digits for table percents
+mytheme <- list(
+  "pkgwide-fn:pvalue_fun" = function(x) style_pvalue(x, digits = 2),
+  "pkgwide-fn:prependpvalue_fun" = function(x) style_pvalue(x, digits = 2, prepend_p = TRUE),
+  "tbl_summary-fn:percent_fun" = function(x) sprintf("%.0f", 100 * x)
+)
 
+# alter your theme using set_gtsummary_theme() or 
+set_gtsummary_theme(mytheme)
+
+# use reset_gtsummary_theme() to reset the themes to their defaults
+reset_gtsummary_theme()
 ```
 
  
