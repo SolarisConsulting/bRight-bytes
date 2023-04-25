@@ -147,8 +147,6 @@ ft_group
 ```
 
 
-## <img src="img/core.png" alt="element" width="20"/>  gtsummary themes
-
 `gtsummary()` includes a number of pre-made themes as well as the ability to create and edit your own themes.
 
 ```{r}
@@ -165,7 +163,6 @@ set_gtsummary_theme(mytheme)
 # use reset_gtsummary_theme() to reset the themes to their defaults
 reset_gtsummary_theme()
 ```
-
 
 > 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com
 
