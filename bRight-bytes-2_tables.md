@@ -44,7 +44,7 @@ Let's create some test data. We will create both continuous and categorical vari
 <details>
     <summary> Click here for the dataset creation and cleaning syntax. </summary>
 
-    ```r
+    ```
     n_sample <- 100
     
     dat <- tibble(
