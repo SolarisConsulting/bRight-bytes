@@ -43,7 +43,7 @@ Let's create some test data. We will create both continuous and categorical vari
 
 <details>
     <summary> Click here for the dataset creation and cleaning syntax. </summary>
-<!-- empty line -->
+
     ```{r}
     n_sample <- 100
     
@@ -89,7 +89,7 @@ Let's create some test data. We will create both continuous and categorical vari
       mutate(across("prepost", ~labelled(.x, labels = c(Pre = 1, Post = 2))))
     ```
 </details>
-<!-- empty line -->
+
 
     
 
