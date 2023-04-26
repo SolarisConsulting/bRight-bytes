@@ -41,50 +41,57 @@ library(tinytex)
 
 Let's create some test data. We will create both continuous and categorical variables. We've defined the object `n_sample` as the number of cases, 100, in our data set. We create the data set using `tibble()` to work with tidyverse package. First, we use `seq()` to create a unique, sequential id variable, the length of the sample `n_sample`. The continuous variables are created using `sample.int()` that samples integers that will represent questionnaire responses to a Likert scale. Our character variables are created using `sample()`. Remember to specify `replace = TRUE` in order to sample with replacement. For a deeper explanation of these transformations, see [bRight byte 1 - Working with Labelled Data](bRight-bytes-1_labelleddata.md).
 
-```{r}
-n_sample <- 100
+<details>
+    <summary> Click here for the dataset creation and cleaning syntax. </summary>
+<!-- empty line -->
+    ```{r}
+    n_sample <- 100
+    
+    dat <- tibble(
+      id = seq(1, n_sample, 1),
+      q1 = sample.int(5, n_sample, replace = TRUE),
+      q2 = sample.int(5, n_sample, replace = TRUE),
+      q3 = sample.int(5, n_sample, replace = TRUE),
+      group = sample.int(4, n_sample, replace = TRUE),
+      sa_1 = sample(c("Selected", "Not selected"), n_sample, replace = TRUE),
+      sa_2 = sample(c("Selected", "Not selected"), n_sample, replace = TRUE),
+      cont = sample.int(100, n_sample, replace = TRUE),
+      prepost = sample(c("Pre","Post"), n_sample, replace = TRUE)
+    )
+    
+    # create scale variable from sub-scale items
+    dat <- dat %>%
+      # rowMeans(.[,2:4], ) specifies the 2nd through 4th column in the dataset
+      # round sets the created variable to a single decimal point
+      mutate(scale = round(rowMeans(.[,2:4], na.rm = TRUE), digits = 1))
+    
+    # specify the labels for your Likert scales
+    da5_labels <- c("Strongly disagree" = 1,
+                    "Somewhat disagree" = 2,
+                    "Neither disagree nor agree" = 3,
+                    "Somewhat agree" = 4,
+                    "Strongly agree" = 5)
+    
+    sa_labels = c("Not selected" = 1,
+                 "Selected" = 2)
+    
+    group_labels <- c("Group 1" = 1,
+                      "Group 2" = 2,
+                      "Group 3" = 3,
+                      "Group 4" = 4)
+    
+    dat_labelled <- dat %>%
+      mutate(across(contains("q"), ~labelled(.x, labels = da5_labels))) %>%
+      mutate(group = labelled(group, labels = group_labels)) %>%
+      mutate(across(contains("sa"), ~factor(.x, levels = c("Not selected", "Selected")))) %>%
+      mutate(across(contains("sa"), ~labelled(.x, labels = sa_labels))) %>%
+      mutate(prepost = factor(prepost, levels = c("Pre", "Post"))) %>%
+      mutate(across("prepost", ~labelled(.x, labels = c(Pre = 1, Post = 2))))
+    ```
+</details>
+<!-- empty line -->
 
-dat <- tibble(
-  id = seq(1, n_sample, 1),
-  q1 = sample.int(5, n_sample, replace = TRUE),
-  q2 = sample.int(5, n_sample, replace = TRUE),
-  q3 = sample.int(5, n_sample, replace = TRUE),
-  group = sample.int(4, n_sample, replace = TRUE),
-  sa_1 = sample(c("Selected", "Not selected"), n_sample, replace = TRUE),
-  sa_2 = sample(c("Selected", "Not selected"), n_sample, replace = TRUE),
-  cont = sample.int(100, n_sample, replace = TRUE),
-  prepost = sample(c("Pre","Post"), n_sample, replace = TRUE)
-)
-
-# create scale variable from sub-scale items
-dat <- dat %>%
-  # rowMeans(.[,2:4], ) specifies the 2nd through 4th column in the dataset
-  # round sets the created variable to a single decimal point
-  mutate(scale = round(rowMeans(.[,2:4], na.rm = TRUE), digits = 1))
-
-# specify the labels for your Likert scales
-da5_labels <- c("Strongly disagree" = 1,
-                "Somewhat disagree" = 2,
-                "Neither disagree nor agree" = 3,
-                "Somewhat agree" = 4,
-                "Strongly agree" = 5)
-
-sa_labels = c("Not selected" = 1,
-             "Selected" = 2)
-
-group_labels <- c("Group 1" = 1,
-                  "Group 2" = 2,
-                  "Group 3" = 3,
-                  "Group 4" = 4)
-
-dat_labelled <- dat %>%
-  mutate(across(contains("q"), ~labelled(.x, labels = da5_labels))) %>%
-  mutate(group = labelled(group, labels = group_labels)) %>%
-  mutate(across(contains("sa"), ~factor(.x, levels = c("Not selected", "Selected")))) %>%
-  mutate(across(contains("sa"), ~labelled(.x, labels = sa_labels))) %>%
-  mutate(prepost = factor(prepost, levels = c("Pre", "Post"))) %>%
-  mutate(across("prepost", ~labelled(.x, labels = c(Pre = 1, Post = 2))))
-```
+    
 
  
 ## <img src="img/core.png" alt="element" width="20"/>  factor transformation
@@ -125,29 +132,25 @@ ft_group <- tbl_summary(group_table,
                        # do not show missing values
                        missing = "no",
                        # sort the table by frequency
-                       sort = list(all_categorical() ~ "frequency")) %>%
-  # set the header labels
-  modify_header(label ~ "", stat_0 ~ "% (N)") %>% 
-  # remove the footnote
-  modify_footnote(update = everything() ~ NA) %>%
-  # use flextable::as_flex_table() to turn the table to a flextable object which can be edited there for display
-  as_flex_table()
+                       sort = list(all_categorical() ~ "frequency")) 
 
-# edit the group table
-ft_group <- ft_group %>% 
-  # reduce padding around the cells (default is 5)
-  padding(padding.bottom = 3.5, padding.top = 3.5, part = "body") %>% 
-  # auto fit the table
-  set_table_properties(layout = "autofit") %>%
-  # set font
-  font(fontname = "Montserrat", part = "all")
-
-# display group in the report - table 1
 ft_group
+                       
 ```
 
 
-`gtsummary()` includes a number of pre-made themes as well as the ability to create and edit your own themes.
+Now that our table contains what we want it to, let's look at updating the headers and footers. Specifically here, we use `modify_header()` to remove the general header and update the header for the statistics column to match our specifications and `modify_footnote()` to remove the footnote that is a duplicate of what's in the header.
+
+```{r}
+ft_group <- ft_group %>%
+  # set the header labels
+  modify_header(label ~ "", stat_0 ~ "% (N)") %>% 
+  # remove the footnote
+  modify_footnote(update = everything() ~ NA)
+```  
+
+
+`gtsummary()` includes a number of pre-made themes as well as the ability to create and edit your own themes. You can also apply themes sequentially.  One example could be applying the JAMA theme with `theme_gtsummary_journal(journal = "jama")` and then remove extra space with `theme_gtsummary_compact()`. You can also modify theme elements individually into a list and edit your theme using `set_gtsummary_theme()`. There are a large number of options so review the documentation carefully! If you make a mistake you can always use `reset_gtsummary_theme()` to reset the theme to its default.
 
 ```{r}
 # set significant digits for table percents
@@ -164,9 +167,24 @@ set_gtsummary_theme(mytheme)
 reset_gtsummary_theme()
 ```
 
-```{r}
 
+Some things cannot be adjusted through a gtsummary theme. For these options, we use the `flextable` package.
+  
+```{r}  
+ft_group <- ft_group  %>%
+  # use flextable::as_flex_table() to turn the table to a flextable object which can be edited there for display
+  as_flex_table() %>%
+  # reduce padding around the cells (default is 5)
+  padding(padding.bottom = 3.5, padding.top = 3.5, part = "body") %>% 
+  # auto fit the table
+  set_table_properties(layout = "autofit") %>%
+  # set font
+  font(fontname = "Montserrat", part = "all")
+
+# display group in the report - table 1
+ft_group
 ```
+
 
 
 
