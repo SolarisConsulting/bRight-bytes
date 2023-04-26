@@ -88,6 +88,7 @@ Let's create some test data. We will create both continuous and categorical vari
       mutate(prepost = factor(prepost, levels = c("Pre", "Post"))) %>%
       mutate(across("prepost", ~labelled(.x, labels = c(Pre = 1, Post = 2))))
     ```
+    
 </details>
 
 
