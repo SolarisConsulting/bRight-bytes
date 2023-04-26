@@ -44,7 +44,7 @@ Let's create some test data. We will create both continuous and categorical vari
 <details>
     <summary> Click here for the dataset creation and cleaning syntax. </summary>
 
-    ```
+    ```{r}
     n_sample <- 100
     
     dat <- tibble(
@@ -91,8 +91,12 @@ Let's create some test data. We will create both continuous and categorical vari
     
 </details>
 
+Alternatively, if you completed bRight bytes 1, you can read in your saved data.
 
-    
+```{r}
+dat_labelled <- haven::read_sav("path/to/data/filename.sav", user_na = TRUE)
+dat_labelled <- read_rds("path/to/data/filename.rds")
+```
 
  
 ## <img src="img/core.png" alt="element" width="20"/>  factor transformation
@@ -109,7 +113,7 @@ dat_factor <- dat_labelled %>%
 ```
 
  
-## <img src="img/core.png" alt="element" width="20"/>  categorical variable frequency table
+## <img src="img/core.png" alt="element" width="20"/>  single categorical variable frequency table
 
 First we will look at a frequency table for a single categorical variable, `group`. The table produced has a header that provides a title and the number of cases, the variable's name and its response categories, frequencies and percentages of the responses, and a footer providing further detail about the statistic column. 
 
@@ -119,7 +123,7 @@ dat_factor %>%
   tbl_summary()
 ```
 
-`tbl_summary()` has a number of options that allow us to edit or specify particular parts of the table. The code below does the following: 
+While this table is well formatted and usable, `tbl_summary()` has a number of options that allow us to edit or specify particular parts of the table that expand its flexibility exponentially. The code below does the following: 
  * `statistic = list(all_categorical() ~ "{p}% ({n}")` allows us to specify the statistics produced for all the categorical variables
  * `missing = "no"` indicates we do not want missing values displayed
  * `sort = list(all_categorical() ~ "frequency")` indicates that we want to sort each categorical variable by response frequencies (`sort = NULL does no sorting`, and `sort = list(all_categorical() ~ "alphanumeric")` sorts alphanumerically)
@@ -140,6 +144,8 @@ ft_group
 ```
 
 
+## <img src="img/core.png" alt="element" width="20"/>  further formatting and themes
+
 Now that our table contains what we want it to, let's look at updating the headers and footers. Specifically here, we use `modify_header()` to remove the general header and update the header for the statistics column to match our specifications and `modify_footnote()` to remove the footnote that is a duplicate of what's in the header.
 
 ```{r}
@@ -151,7 +157,7 @@ ft_group <- ft_group %>%
 ```  
 
 
-`gtsummary()` includes a number of pre-made themes as well as the ability to create and edit your own themes. You can also apply themes sequentially.  One example could be applying the JAMA theme with `theme_gtsummary_journal(journal = "jama")` and then remove extra space with `theme_gtsummary_compact()`. You can also modify theme elements individually into a list and edit your theme using `set_gtsummary_theme()`. There are a large number of options so review the documentation carefully! If you make a mistake you can always use `reset_gtsummary_theme()` to reset the theme to its default.
+`gtsummary` includes a number of pre-made themes as well as the ability to create and edit your own themes. You can also apply themes sequentially.  One example could be applying the JAMA theme with `theme_gtsummary_journal(journal = "jama")` and then remove extra space with `theme_gtsummary_compact()`. You can also modify theme elements individually into a list and edit your theme using `set_gtsummary_theme()`. There are a large number of options so review the documentation carefully! If you make a mistake you can always use `reset_gtsummary_theme()` to reset the theme to its default.
 
 ```{r}
 # set significant digits for table percents
@@ -169,7 +175,9 @@ reset_gtsummary_theme()
 ```
 
 
-Some things cannot be adjusted through a gtsummary theme. For these options, we use the `flextable` package.
+## <img src="img/core.png" alt="element" width="20"/>  advanced formatting through flextable
+
+While flexible, some table aspects cannot be adjusted through a gtsummary theme. For these options, we use the `flextable` package. First we convert the gtsummary table to a flextable using `as_flex_table()`. `flextable` is a deep package and we suggest consulting David Gohel's [Using the flextable R package](https://ardata-fr.github.io/flextable-book/) for specifics. `flextable` is useful for incorporating tables into Microsoft Office products through RMarkdown documents. This will be covered in a future bRight byte.
   
 ```{r}  
 ft_group <- ft_group  %>%
@@ -182,11 +190,8 @@ ft_group <- ft_group  %>%
   # set font
   font(fontname = "Montserrat", part = "all")
 
-# display group in the report - table 1
 ft_group
 ```
-
-
 
 
 > 2023 Solaris Consulting Group, LLC. info@solarisconsultinggroup.com

@@ -157,8 +157,8 @@ write_rds(dat_labelled.2, "path/to/data/filename.rds")
 If you are reading an SPSS file using `haven::read_sav()`, specifying `user_na = TRUE` will retain any missing values you may have defined. By default all missing values will be converted to NA. Importing an .rds file will maintain the file as-is.
 
 ```{r}
-data <- haven::read_sav("path/to/data/filename.sav", user_na = TRUE)
-data <- read_rds("path/to/data/filename.rds")
+dat <- haven::read_sav("path/to/data/filename.sav", user_na = TRUE)
+dat <- read_rds("path/to/data/filename.rds")
 ```
 
  
