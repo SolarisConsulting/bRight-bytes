@@ -39,10 +39,10 @@ library(sysfonts)
 library(tinytex)
 ```
 
-Let's create some test data. We will create both continuous and categorical variables. We've defined the object `n_sample` as the number of cases, 100, in our data set. We create the data set using `tibble()` to work with tidyverse package. First, we use `seq()` to create a unique, sequential id variable, the length of the sample `n_sample`. The continuous variables are created using `sample.int()` that samples integers that will represent questionnaire responses to a Likert scale or a range question (1-100). Our character variables are created using `sample()`. Remember to specify `replace = TRUE` in both cases in order to sample with replacement. For a deeper explanation of these transformations, see [bRight byte 1 - Working with Labelled Data](bRight-bytes-1_labelleddata.md).
+Let's create some test data. We will create both continuous and categorical variables. We've defined the object `n_sample` as the number of cases, 100, in our data set. We create the data set using `tibble()` to work with tidyverse package. First, we use `seq()` to create a unique, sequential id variable, the length of the sample `n_sample`. The continuous variables are created using `sample.int()` that samples integers that will represent questionnaire responses to a Likert scale or a continuous variable (the possible range for cont here is 1-100). Our character variables are created using `sample()`. Remember to specify `replace = TRUE` in both cases in order to sample with replacement. For a deeper explanation of these transformations, see [bRight byte 1 - Working with Labelled Data](bRight-bytes-1_labelleddata.md).
 
 <details>
-    <summary> Click here for the dataset creation and cleaning syntax. </summary>
+    <summary> Click here for the data set creation and cleaning syntax. </summary>
 
     ```{r}
     n_sample <- 100
@@ -101,7 +101,7 @@ dat_labelled <- read_rds("path/to/data/filename.rds")
  
 ## <img src="img/core.png" alt="element" width="20"/>  factor transformation
 
-The `gtsummary` package works particularly well with factor variables, but will work with your already labelled data as well. As an example, we will transform our categorical variables to factors. We will apply `labelled::to_factor()` to the factor variables using the now familiar `mutate(across())`, using our defined variable labels as the factor levels. The use of `!all_of()` within `across()` means we want the transformations applied to none of the columns (`!` within `all_of()`) indicated by the object `nonfactors`. 
+The `gtsummary` package works particularly well with factor variables, but will work with your already labelled data as well. As an example, we will transform our categorical variables to factors. We will apply `labelled::to_factor()` to the factor variables using the now familiar `mutate(across())`, using our defined variable labels as the factor levels. The use of `!all_of()` within `across()` means we want the transformations applied to none (`!`) of the columns within `all_of()` the object `nonfactors`. 
 
 ```{r}
 # define non-factor variables
